@@ -74,9 +74,10 @@ export default function Home() {
     let count = 0;
     const interval = 150;
 
-    // 決定真正的選中對象
+    // 決定真正的選中對象（1/2 是你，1/2 是 0~4 中一位）
     const isLose = Math.random() < 0.5;
-    const chosen = isLose ? 5 : Math.floor(Math.random() * 5);
+    const otherIndices = [0, 1, 2, 3, 4];
+    const chosen = isLose ? 5 : otherIndices[Math.floor(Math.random() * otherIndices.length)];
 
     // 建立動畫序列，最後一個是 chosen
     const pool = Array.from({ length: 20 }, () => Math.floor(Math.random() * 6));
@@ -139,7 +140,7 @@ export default function Home() {
       ) : (
         <>
           <div className="flex items-center justify-center mt-12 mb-6 w-full max-w-6xl px-4 gap-2">
-            <Image src="/images/torch.png" alt="torch" width={64} height={64} className="w-10 h-10 object-contain" />
+            <Image src="/images/torch.png" alt="torch" width={64} height={64} className="w-14 h-14 object-contain" />
             <div className="relative w-[360px] sm:w-[520px] md:w-[680px] h-[100px] sm:h-[120px] md:h-[140px]">
               <Image
                 src="/images/banner.png"
@@ -157,7 +158,7 @@ export default function Home() {
                 {displayedText}
               </div>
             </div>
-            <Image src="/images/torch.png" alt="torch" width={64} height={64} className="w-10 h-10 object-contain" />
+            <Image src="/images/torch.png" alt="torch" width={64} height={64} className="w-14 h-14 object-contain" />
           </div>
 
           {endingImage && (
