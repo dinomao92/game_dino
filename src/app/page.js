@@ -19,6 +19,7 @@ export default function Home() {
   const [gameStarted, setGameStarted] = useState(false);
   const [showResultScreen, setShowResultScreen] = useState(false);
   const [displayedText, setDisplayedText] = useState("");
+  const [endingImage, setEndingImage] = useState(null);
 
   const messages = [
     "歡迎來到上台答題地獄（點擊文字略過）",
@@ -26,7 +27,6 @@ export default function Home() {
     "就讓我們馬上開始吧哈哈哈，祝福你成功躲過一劫",
   ];
 
-  // 打字機效果
   useEffect(() => {
     let index = 0;
     const fullText = step !== null && step >= 0 ? messages[step] : result || "";
@@ -36,7 +36,6 @@ export default function Home() {
       tempText += fullText[index];
       setDisplayedText(tempText);
       index++;
-
       if (index >= fullText.length) {
         clearInterval(intervalId);
       }
@@ -45,18 +44,8 @@ export default function Home() {
     return () => clearInterval(intervalId);
   }, [step, result]);
 
-  const shuffleArray = (array) => {
-    const shuffled = [...array];
-    for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-    }
-    return shuffled;
-  };
-
   const nextMessage = () => {
     if (gameStarted || step === null) return;
-
     const clickSound = new Audio("/sounds/button.mp3");
     clickSound.volume = 0.5;
     clickSound.play();
@@ -80,14 +69,18 @@ export default function Home() {
 
     setResult("惡魔班導點名中⋯⋯");
     setGameStarted(true);
-    let count = 0;
-    let interval = 150;
+    setEndingImage(null);
 
-    const sequence = shuffleArray([
-      ...Array(students.length).keys(),
-      ...Array(students.length).keys(),
-      ...Array(students.length).keys(),
-    ]);
+    let count = 0;
+    const interval = 150;
+
+    // 決定真正的選中對象
+    const isLose = Math.random() < 0.5;
+    const chosen = isLose ? 5 : Math.floor(Math.random() * 5);
+
+    // 建立動畫序列，最後一個是 chosen
+    const pool = Array.from({ length: 20 }, () => Math.floor(Math.random() * 6));
+    const sequence = [...pool, chosen];
 
     const intervalId = setInterval(() => {
       setActive(sequence[count]);
@@ -95,26 +88,22 @@ export default function Home() {
 
       if (count >= sequence.length) {
         clearInterval(intervalId);
-
         if (selectSoundRef.current) {
           selectSoundRef.current.pause();
           selectSoundRef.current.currentTime = 0;
         }
 
-        const chosen = sequence[sequence.length - 1];
         setTimeout(() => {
           setActive(chosen);
 
           if (chosen === 5) {
-            const loseSound = new Audio("/sounds/lose.mp3");
-            loseSound.volume = 1.0;
-            loseSound.play();
+            new Audio("/sounds/lose.mp3").play();
             setResult("你GG啦哈哈哈！");
+            setTimeout(() => setEndingImage("lose"), 500 + Math.random() * 500);
           } else {
-            const victorySound = new Audio("/sounds/victory.mp3");
-            victorySound.volume = 0.3;
-            victorySound.play();
+            new Audio("/sounds/victory.mp3").play();
             setResult("恭喜你逃過一劫，下次可就沒那麼幸運啦");
+            setTimeout(() => setEndingImage("win"), 500 + Math.random() * 500);
           }
 
           setTimeout(() => {
@@ -131,6 +120,7 @@ export default function Home() {
     setResult("");
     setGameStarted(false);
     setShowResultScreen(false);
+    setEndingImage(null);
   };
 
   return (
@@ -138,41 +128,18 @@ export default function Home() {
       {showResultScreen ? (
         <div className="flex flex-col items-center justify-center h-screen">
           <div className="flex flex-wrap justify-center gap-4 max-w-[620px]">
-            <button
-              onClick={resetGame}
-              className="transition-transform duration-200 hover:scale-110 cursor-pointer"
-            >
-              <Image
-                src="/images/restart.png"
-                alt="Restart"
-                width={300}
-                height={100}
-                className="w-[200px] max-w-full h-auto"
-              />
+            <button onClick={resetGame} className="transition-transform hover:scale-110">
+              <Image src="/images/restart.png" alt="Restart" width={300} height={100} className="w-[200px]" />
             </button>
-            <button className="transition-transform duration-200 hover:scale-110 cursor-pointer">
-              <Image
-                src="/images/back.png"
-                alt="Back"
-                width={300}
-                height={100}
-                className="w-[200px] max-w-full h-auto"
-              />
+            <button className="transition-transform hover:scale-110">
+              <Image src="/images/back.png" alt="Back" width={300} height={100} className="w-[200px]" />
             </button>
           </div>
         </div>
       ) : (
         <>
-          {/* 訊息匡 + 火把 */}
           <div className="flex items-center justify-center mt-12 mb-6 w-full max-w-6xl px-4 gap-2">
-            <Image
-              src="/images/torch.png"
-              alt="torch"
-              width={64}
-              height={64}
-              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 object-contain"
-            />
-
+            <Image src="/images/torch.png" alt="torch" width={64} height={64} className="w-10 h-10 object-contain" />
             <div className="relative w-[360px] sm:w-[520px] md:w-[680px] h-[100px] sm:h-[120px] md:h-[140px]">
               <Image
                 src="/images/banner.png"
@@ -190,17 +157,21 @@ export default function Home() {
                 {displayedText}
               </div>
             </div>
-
-            <Image
-              src="/images/torch.png"
-              alt="torch"
-              width={64}
-              height={64}
-              className="w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 object-contain"
-            />
+            <Image src="/images/torch.png" alt="torch" width={64} height={64} className="w-10 h-10 object-contain" />
           </div>
 
-          {/* 學生圖格 */}
+          {endingImage && (
+            <div className="my-6">
+              <Image
+                src={`/images/${endingImage}.png`}
+                alt={endingImage}
+                width={200}
+                height={200}
+                className="mx-auto"
+              />
+            </div>
+          )}
+
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-12 max-w-5xl px-10 py-10 w-full justify-items-center">
             {students.map((filename, i) => (
               <div key={i} className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28">
@@ -217,7 +188,6 @@ export default function Home() {
         </>
       )}
 
-      {/* 火焰背景貼底 */}
       {!showResultScreen && (
         <div
           className="fixed bottom-0 left-0 w-full h-[100px] bg-repeat-x bg-contain bg-bottom z-10"
