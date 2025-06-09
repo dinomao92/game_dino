@@ -1,5 +1,6 @@
 "use client";
 
+import Link from 'next/link';
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 
@@ -132,9 +133,12 @@ export default function Home() {
             <button onClick={resetGame} className="transition-transform hover:scale-110">
               <Image src="/images/restart.png" alt="Restart" width={300} height={100} className="w-[200px]" />
             </button>
-            <button className="transition-transform hover:scale-110">
-              <Image src="/images/back.png" alt="Back" width={300} height={100} className="w-[200px]" />
-            </button>
+
+            <Link href="https://classroomdaydream.vercel.app">
+              <button className="transition-transform hover:scale-110">
+                <Image src="/images/back.png" alt="Back" width={300} height={100} className="w-[200px]" />
+              </button>
+            </Link>
           </div>
         </div>
       ) : (
@@ -150,9 +154,8 @@ export default function Home() {
                 className="object-contain"
               />
               <div
-                className={`absolute inset-0 flex justify-center items-center text-xs sm:text-base md:text-lg text-white text-center px-6 leading-snug ${
-                  gameStarted ? "cursor-default pointer-events-none" : "cursor-pointer"
-                }`}
+                className={`absolute inset-0 flex justify-center items-center text-xs sm:text-base md:text-lg text-white text-center px-6 leading-snug ${gameStarted ? "cursor-default pointer-events-none" : "cursor-pointer"
+                  }`}
                 onClick={nextMessage}
               >
                 {displayedText}
@@ -178,9 +181,8 @@ export default function Home() {
               <div key={i} className="w-20 h-20 sm:w-24 sm:h-24 lg:w-28 lg:h-28">
                 <img
                   src={`/images/${filename}`}
-                  className={`w-full h-full object-contain image-rendering-pixel ${
-                    active === i ? "brightness-50" : ""
-                  }`}
+                  className={`w-full h-full object-contain image-rendering-pixel ${active === i ? "brightness-50" : ""
+                    }`}
                   alt={`Student ${i + 1}`}
                 />
               </div>
